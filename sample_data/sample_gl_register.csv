@@ -1,0 +1,21 @@
+﻿Date,Reference,Amount,Description
+01-09-2024,CHQ001,5000,Rent Payment
+02-09-2024,DEP001,15000,Sales Revenue
+03-09-2024,CHQ002,-3000,Office Supplies
+04-09-2024,TRF001,7500,Inter-account Transfer
+06-09-2024,DEP002,20000,Customer Settlement
+07-09-2024,CHQ004,-1200,Utility Bill
+08-09-2024,TRF002,4500,Vendor Refund
+09-09-2024,DEP003,8800,Customer Settlement
+04-09-2024,CHQ005,-6600,Equipment Purchase
+11-09-2024,CHQ006,-900,Consulting Fee
+12-09-2024,DEP004,12300,Customer Settlement
+13-09-2024,TRF003,-2200,Inter-account Transfer
+15-09-2024,CHQ007,-4400,Insurance Premium
+15-09-2024,DEP005,9100,Customer Settlement
+16-09-2024,CHQ008,-3300,Marketing Expense
+18-09-2024,DEP006,17000,Customer Settlement
+20-09-2024,TRF004,-5500,Inter-account Transfer
+21-09-2024,CHQ010,-1800,Accrual Reversal
+22-09-2024,ACR001,-7700,Depreciation Accrual
+23-09-2024,ACR002,-3600,Provision Entry

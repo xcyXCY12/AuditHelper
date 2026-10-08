@@ -1,0 +1,27 @@
+# 审计助手 · 银行对账工具
+# ============================================================
+# Python 3.11
+# 安装：  pip install -r requirements.txt
+# 运行：  streamlit run app.py
+
+# ---- 界面 ----
+streamlit>=1.40,<2.0
+
+# ---- 数据处理 ----
+pandas>=2.2,<3.0
+numpy>=1.26
+
+# ---- 中间数据层（Soda 的 DuckDB 数据源） ----
+duckdb>=1.1,<2.0
+
+# ---- Excel 读写 ----
+openpyxl>=3.1,<4.0
+
+# ---- 契约 YAML ----
+pyyaml>=6.0
+
+# ---- Soda Core v4（Data Contracts 模式） ----
+# 说明：soda-duckdb 会引入 soda-core。
+#   若安装失败或处于离线环境，应用会自动降级到内置 pandas 校验内核，
+#   功能（missing / invalid / duplicate / row_count / failed_rows + 阈值分级）保持一致。
+soda-duckdb

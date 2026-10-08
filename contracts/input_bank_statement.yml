@@ -1,0 +1,56 @@
+# =============================================================================
+# 输入契约：bank_statement（银行对账单）
+# =============================================================================
+# 校验目标：date / amount / reference 三列无缺失
+#
+# 【用户根据实际列名调整】
+#   - dataset 的 4 段式路径必须与 ds_config.yml 的 name 前缀一致：
+#         数据源名 / 数据库名 / schema 名 / 视图名
+#   - name 字段应与 loader.py 注册的 DuckDB 视图名一致（bank_statement）
+#   - 若实际列名不是 date/amount/reference，请同步修改下面的 column name
+# -----------------------------------------------------------------------------
+
+dataset: audit_duckdb/memory/main/bank_statement
+
+checks:
+  - row_count:
+      name: 对账单不能为空
+      threshold:
+        must_be_greater_than: 0
+
+columns:
+  # ---- 日期列：不允许缺失 ----
+  - name: Date            # 【调整点】实际列名（示例文件为 Date）
+    checks:
+      - missing:
+          name: 交易日期不允许缺失
+          threshold:
+            must_be: 0
+      # 日期格式合法性用自定义 SQL 表达式校验（无法解析为日期的行会被识别出来）
+      - invalid:
+          name: 交易日期必须可解析为日期
+          valid_format:
+            name: 可解析日期
+            regex: ^\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}$
+
+  # ---- 金额列：不允许缺失 ----
+  - name: Amount          # 【调整点】实际列名（示例文件为 Amount）
+    checks:
+      - missing:
+          name: 交易金额不允许缺失
+          threshold:
+            must_be: 0
+      # 金额必须是数值（允许负号、千分位、货币符号）
+      - invalid:
+          name: 交易金额必须为数值
+          valid_format:
+            name: 数值格式
+            regex: ^[-+(]?[¥￥$€£]?\s?\d[\d,\s]*(\.\d+)?\)?$
+
+  # ---- 参考号列：不允许缺失 ----
+  - name: Reference       # 【调整点】实际列名（示例文件为 Reference）
+    checks:
+      - missing:
+          name: 参考号不允许缺失
+          threshold:
+            must_be: 0

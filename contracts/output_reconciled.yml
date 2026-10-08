@@ -1,0 +1,91 @@
+# =============================================================================
+# 输出契约：reconciled（对账结果表）
+# =============================================================================
+# 校验目标：
+#   1. match_status 取值合法（只能是我们定义的 5 类状态）
+#   2. amount_diff 无缺失
+#
+# 【用户根据实际列名调整】
+#   - 若 reconciler.py 输出列名有变动，同步改这里的 column name
+#   - 阈值（threshold）请按审计重要性水平调整：
+#       严格场景：must_be: 0
+#       容许少量未达账项：改成 must_be_less_than: N，或用 percent 阈值
+# -----------------------------------------------------------------------------
+
+dataset: audit_duckdb/memory/main/reconciled
+
+checks:
+  # ---- 对账结果表本身不能为空 ----
+  - row_count:
+      name: 对账结果不能为空
+      threshold:
+        must_be_greater_than: 0
+
+  # ---- 数据集级多列重复检查：同一匹配对不应重复出现 ----
+  - duplicate:
+      name: 匹配对不应重复登记
+      columns: ['reference', 'match_status']   # 【调整点】按业务主键调整
+      threshold:
+        # 参考号本身可能重复（一借多贷），因此这里设为 warn 级别的宽松阈值示例；
+        # 若参考号在贵司是唯一凭证号，请改为 must_be: 0
+        must_be_less_than: 1
+
+  # ---- 未达账项笔数控制（可按审计重要性水平调整阈值） ----
+  # 提示：Soda 要求同类型检查出现多次时必须带唯一 qualifier，否则报 Duplicate identity
+  - failed_rows:
+      name: bank_only 笔数控制
+      qualifier: bank_only_count
+      expression: "match_status = 'bank_only'"
+      threshold:
+        must_be_less_than_or_equal: 2      # 【调整点】按重要性水平调整
+
+  - failed_rows:
+      name: gl_only 笔数控制
+      qualifier: gl_only_count
+      expression: "match_status = 'gl_only'"
+      threshold:
+        must_be_less_than_or_equal: 3      # 【调整点】按重要性水平调整
+
+columns:
+  # ---- 状态列：取值必须合法 ----
+  - name: match_status    # 【调整点】实际状态列名
+    data_type: varchar
+    checks:
+      - missing:
+          name: 对账状态不允许缺失
+          threshold:
+            must_be: 0
+      - invalid:
+          name: 对账状态取值必须合法
+          valid_values:
+            - matched
+            - bank_only
+            - gl_only
+            - mismatch
+            - duplicate
+
+  # ---- 差异金额列：不允许缺失 ----
+  # 说明：reconciler._build_reconciled 已把单边记录（bank_only/gl_only）的
+  #       amount_diff 补为 0，因此这里的 must_be: 0 是可以达成的；
+  #       一旦出现缺失，说明金额解析失败，属于必须人工介入的硬错误。
+  - name: amount_diff     # 【调整点】实际差异金额列名
+    checks:
+      - missing:
+          name: 差异金额不允许缺失
+          threshold:
+            must_be: 0
+
+  # ---- 日期差列：不允许为负（容差匹配只会产生非负差值） ----
+  - name: date_diff_days  # 【调整点】实际日期差列名
+    checks:
+      - invalid:
+          name: 日期差必须非负
+          valid_min: 0
+
+  # ---- 参考号列：输出侧不允许缺失（reconciler 已补占位符） ----
+  - name: reference
+    checks:
+      - missing:
+          name: 参考号不允许缺失
+          threshold:
+            must_be: 0

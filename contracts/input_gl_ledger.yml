@@ -1,0 +1,47 @@
+# =============================================================================
+# 输入契约：gl_ledger（总账明细账）
+# =============================================================================
+# 校验目标：date / amount / reference 三列无缺失
+#
+# 【用户根据实际列名调整】同 input_bank_statement.yml
+# -----------------------------------------------------------------------------
+
+dataset: audit_duckdb/memory/main/gl_ledger
+
+checks:
+  - row_count:
+      name: 总账明细不能为空
+      threshold:
+        must_be_greater_than: 0
+
+columns:
+  - name: Date            # 【调整点】实际列名（示例文件为 Date）
+    checks:
+      - missing:
+          name: 记账日期不允许缺失
+          threshold:
+            must_be: 0
+      - invalid:
+          name: 记账日期必须可解析为日期
+          valid_format:
+            name: 可解析日期
+            regex: ^\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}$
+
+  - name: Amount          # 【调整点】实际列名（示例文件为 Amount）
+    checks:
+      - missing:
+          name: 记账金额不允许缺失
+          threshold:
+            must_be: 0
+      - invalid:
+          name: 记账金额必须为数值
+          valid_format:
+            name: 数值格式
+            regex: ^[-+(]?[¥￥$€£]?\s?\d[\d,\s]*(\.\d+)?\)?$
+
+  - name: Reference       # 【调整点】实际列名（示例文件为 Reference）
+    checks:
+      - missing:
+          name: 凭证号不允许缺失
+          threshold:
+            must_be: 0

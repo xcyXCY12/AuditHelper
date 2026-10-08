@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
+# 运行时动态生成的契约（由 adapter.build_output_contract 产出）
+contracts/output_reconciled_dynamic.yml
+
+# IDE / 编辑器
+.idea/
+
+# Streamlit 本地运行时目录（密钥不进仓库）
+.streamlit/
+
+# 系统杂项
+Thumbs.db
+.DS_Store
